@@ -14,7 +14,8 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid x:Name="MainGrid"
+		Loaded="MainGrid_Loaded">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="Auto"/>
@@ -22,82 +23,62 @@
         </Grid.ColumnDefinitions>
         
         <Grid Grid.Column="0">
-            <Canvas 
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
-                
-                <Rectangle Fill="Red" Width="30" Height="30" Canvas.Left="0" Canvas.Top="0" Canvas.ZIndex="0" />
+			<Canvas 
+				Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch">
+				<Rectangle Fill="Red" Width="30" Height="30" Canvas.Left="0" Canvas.Top="0" Canvas.ZIndex="0" />
                 <Rectangle Fill="Blue" Width="30" Height="30" Canvas.Left="20" Canvas.Top="20" Canvas.ZIndex="1" />
                 <Rectangle Fill="Green" Width="30" Height="30" Canvas.Left="40" Canvas.Top="40" Canvas.ZIndex="2" />
                 <Rectangle Fill="Yellow" Width="30" Height="30" Canvas.Left="60" Canvas.Top="60" Canvas.ZIndex="3" />
             </Canvas>
-            
         </Grid>
 
         <controls:GridSplitter
-            
-            Grid.Column="1"
-            Width="8"
-            Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
-            ResizeBehavior="BasedOnAlignment"
+			Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
+			Grid.Column="1"
             HorizontalAlignment="Center"
-            VerticalAlignment="Stretch"/>
+			ResizeBehavior="BasedOnAlignment"
+            VerticalAlignment="Stretch"
+			Width="8"/>
 
         <Grid Grid.Column="2">
-            <StackPanel
-                Orientation="Vertical"
-                HorizontalAlignment="Stretch"
+			<StackPanel
+				Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
                 BorderBrush="#404040"
-                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-                BorderThickness="1"
+				BorderThickness="1"
+				HorizontalAlignment="Stretch"
+				Orientation="Vertical"
                 Padding="4,4,4,4"
                 Spacing="8">
-                <TextBox x:Name="TxtNombreNodo"
-                    AutomationProperties.Name="simple TextBox"
-                    Header="Nodo"
-                    FontWeight="Bold"
-                    PlaceholderText="[Nombre del nodo]"
-                    PlaceholderForeground="Gray"
-                    Margin="3,0,3,0">
+				<TextBox x:Name="TxtNombreNodo"
+						 AutomationProperties.Name="simple TextBox"
+						 FontWeight="Bold"
+						 Header="Nodo"
+						 Margin="3,0,3,0"
+						 MaxLength="24"
+                         PlaceholderForeground="Gray"
+						 PlaceholderText="[Nombre del nodo]">
+				</TextBox>
+                <TextBox x:Name="TxtDescripcionNodo"
+						 AutomationProperties.Name="simple TextBox"
+                         FontSize="11"
+						 Header="Descripción"
+						 IsSpellCheckEnabled="True"
+						 LostFocus="TxtDescripcionNodo_LostFocus"
+						 Margin="3,0,3,0"
+						 MaxLength="50"
+                         PlaceholderForeground="Gray"
+						 PlaceholderText="[Descripción y detalle]"
+                         SelectionHighlightColor="Green">
+                         <TextBox.HeaderTemplate>
+							 <DataTemplate>
+								 <TextBlock
+									 FontSize="14"
+									 Text="{Binding}"/>
+                                </DataTemplate>
+                         </TextBox.HeaderTemplate>
                 </TextBox>
-                <RelativePanel
-                    VerticalAlignment="Top">
-                    <TextBox x:Name="TxtDescripcionNodo"
-                        AutomationProperties.Name="multi-line TextBox"
-                        Header="Descripción"
-                        PlaceholderText="[Descripción y detalle]"
-                        PlaceholderForeground="Gray"
-                        FontSize="11"
-                        TextWrapping="Wrap"
-                        AcceptsReturn="True" 
-                        IsSpellCheckEnabled="True"
-                        SelectionHighlightColor="Green" 
-                        RelativePanel.AlignLeftWithPanel="True"
-                        RelativePanel.LeftOf="BtnLimpiarDecripcion"
-                        MinWidth="200"
-                        Margin="3,0,3,0">
-                        <TextBox.HeaderTemplate>
-                            <DataTemplate>
-                                <TextBlock 
-                                     Text="{Binding}" 
-                                     FontSize="14"/>
-                            </DataTemplate>
-                        </TextBox.HeaderTemplate>
-                    </TextBox>
-                    <Button x:Name="BtnLimpiarDecripcion"
-                        Content="&#xE711;"
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="12"
-                        Width="28"
-                        Height="24"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        RelativePanel.AlignRightWithPanel="True"
-                        Margin="0,32,3,8"
-                        Padding="0,0,0,0"
-                        Click="BtnLimpiarDecripcion_Click"/>
-                </RelativePanel>
             </StackPanel>
         </Grid>
     </Grid>

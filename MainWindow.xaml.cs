@@ -23,16 +23,28 @@ namespace NodeSharp
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        public MainWindow()
+		#region Variables y Propiedades
+
+		#endregion
+		public MainWindow()
         {
             InitializeComponent();
-            BtnLimpiarDecripcion.Click += BtnLimpiarDecripcion_Click;
-        }
+		}
 
-        private void BtnLimpiarDecripcion_Click(object sender, RoutedEventArgs e)
-        {
-            TxtDescripcionNodo.Text = string.Empty;
-            TxtDescripcionNodo.Focus(FocusState.Programmatic);
-        }
-    }
+		#region Metodos
+		private void MainGrid_Loaded(object sender, RoutedEventArgs e)
+		{
+			System.Diagnostics.Debug.WriteLine("MainGrid cargado");
+		}
+		#endregion
+
+		#region Eventos
+		private void TxtDescripcionNodo_LostFocus(object sender, RoutedEventArgs e)
+		{
+			TxtDescripcionNodo.Text = TxtDescripcionNodo.Text.Trim();
+			System.Diagnostics.Debug.WriteLine("Perdio enfoque");
+		}
+		#endregion
+
+	}
 }
