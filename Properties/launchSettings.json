@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "NodeSharp (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "NodeSharp (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
