@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Ignorar la libreria Monaco
+Assets/Monaco/min/
+
 # User-specific files
 *.rsuser
 *.suo

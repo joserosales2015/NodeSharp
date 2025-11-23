@@ -3,11 +3,13 @@
     x:Class="NodeSharp.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:NodeSharp"
+	xmlns:local="using:NodeSharp"
+	xmlns:nodeControls="using:NodeSharp.Controls"
+	xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    
     Title="NodeSharp">
 
     <Window.SystemBackdrop>
@@ -34,7 +36,7 @@
             </Canvas>
         </Grid>
 
-        <controls:GridSplitter
+        <toolkit:GridSplitter
 			Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
 			Grid.Column="1"
             HorizontalAlignment="Center"
@@ -43,43 +45,113 @@
 			Width="8"/>
 
         <Grid Grid.Column="2">
-			<StackPanel
+			<RelativePanel 
 				Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-                BorderBrush="#404040"
-				BorderThickness="1"
 				HorizontalAlignment="Stretch"
-				Orientation="Vertical"
-                Padding="4,4,4,4"
-                Spacing="8">
-				<TextBox x:Name="TxtNombreNodo"
-						 AutomationProperties.Name="simple TextBox"
-						 FontWeight="Bold"
-						 Header="Nodo"
-						 Margin="3,0,3,0"
-						 MaxLength="24"
-                         PlaceholderForeground="Gray"
-						 PlaceholderText="[Nombre del nodo]">
-				</TextBox>
-                <TextBox x:Name="TxtDescripcionNodo"
-						 AutomationProperties.Name="simple TextBox"
-                         FontSize="11"
-						 Header="Descripción"
-						 IsSpellCheckEnabled="True"
-						 LostFocus="TxtDescripcionNodo_LostFocus"
-						 Margin="3,0,3,0"
-						 MaxLength="50"
-                         PlaceholderForeground="Gray"
-						 PlaceholderText="[Descripción y detalle]"
-                         SelectionHighlightColor="Green">
-                         <TextBox.HeaderTemplate>
-							 <DataTemplate>
-								 <TextBlock
-									 FontSize="14"
-									 Text="{Binding}"/>
-                                </DataTemplate>
-                         </TextBox.HeaderTemplate>
-                </TextBox>
-            </StackPanel>
-        </Grid>
+				VerticalAlignment="Stretch">
+				<StackPanel x:Name="PnlNodo"
+							Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+							BorderBrush="#404040"
+							BorderThickness="1"
+							Margin="0,8,8,0"
+							Orientation="Vertical"
+							Padding="0"
+							RelativePanel.AlignTopWithPanel="True"
+							RelativePanel.AlignLeftWithPanel="True"
+							RelativePanel.AlignRightWithPanel="True"
+							Spacing="0">
+
+					<Rectangle x:Name="ShpDivisor1"
+							   Fill="SteelBlue" 
+							   Height="5" 
+							   Margin="0,0,0,4"/>
+
+					<TextBox x:Name="TxtNombreNodo"
+							 AutomationProperties.Name="simple TextBox"
+							 FontWeight="Bold"
+							 Header="Nodo"
+							 Margin="8,0,8,8"
+							 MaxLength="24"
+							 PlaceholderForeground="Gray"
+							 PlaceholderText="[Nombre del nodo]"/>
+
+					<TextBox x:Name="TxtDescripcionNodo"
+							 AutomationProperties.Name="simple TextBox"
+							 FontSize="11"
+							 Header="Descripción"
+							 IsSpellCheckEnabled="True"
+							 LostFocus="TxtDescripcionNodo_LostFocus"
+							 Margin="8,0,8,8"
+							 MaxLength="50"
+							 PlaceholderForeground="Gray"
+							 PlaceholderText="[Descripción y detalle]"
+							 SelectionHighlightColor="Green">
+					
+						<TextBox.HeaderTemplate>
+							<DataTemplate>
+								<TextBlock
+									FontSize="14"
+									Text="{Binding}"/>
+							</DataTemplate>
+						</TextBox.HeaderTemplate>
+					</TextBox>
+				</StackPanel>
+				<RelativePanel x:Name="PnlEditorCodigo"
+							   Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+							   BorderBrush="#404040"
+							   BorderThickness="1"
+							   Margin="0,8,8,8"
+							   RelativePanel.AlignBottomWithPanel="True"
+							   RelativePanel.AlignLeftWithPanel="True"
+							   RelativePanel.AlignRightWithPanel="True"
+							   RelativePanel.Below="PnlNodo">
+					
+					<Rectangle x:Name="ShpDivisor2"
+							   Fill="SlateBlue" 
+							   Height="5" 
+							   Margin="0,0,0,4"
+							   RelativePanel.AlignLeftWithPanel="True"
+							   RelativePanel.AlignRightWithPanel="True"
+							   RelativePanel.AlignTopWithPanel="True"/>
+					
+					<TextBlock x:Name="LblEditorCodigo"
+							   Margin="8,0,8,8"
+							   RelativePanel.AlignLeftWithPanel="True"
+							   RelativePanel.AlignRightWithPanel="True"
+							   RelativePanel.Below="ShpDivisor2"
+							   Text="Editor de Código:"/>
+
+					<Border x:Name="ShpBorder"
+							Background="Transparent"
+							BorderBrush="#404040" 
+							BorderThickness="1" 
+							Margin="8,0,8,8"
+							RelativePanel.Above="BtnCargarCodigo"
+							RelativePanel.AlignLeftWithPanel="True"
+							RelativePanel.AlignRightWithPanel="True"
+							RelativePanel.Below="LblEditorCodigo">
+						
+						<nodeControls:MonacoEditor x:Name="TxtEditorCodigo"/>
+					</Border>
+
+					<Button x:Name="BtnCargarCodigo"
+							Content="Cargar Código Demo"
+							HorizontalAlignment="Stretch"
+							Margin="8,0,8,8"
+							RelativePanel.AlignBottomWithPanel="True"
+							RelativePanel.AlignLeftWithPanel="True"
+							RelativePanel.AlignRightWithPanel="True"
+							Click="BtnCargarCodigo_Click"/>
+				</RelativePanel>
+
+				
+
+				
+				
+				
+				
+				
+			</RelativePanel>
+		</Grid>
     </Grid>
 </Window>

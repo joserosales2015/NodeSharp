@@ -31,10 +31,12 @@ namespace NodeSharp
             InitializeComponent();
 		}
 
+		
+
 		#region Metodos
 		private void MainGrid_Loaded(object sender, RoutedEventArgs e)
 		{
-			System.Diagnostics.Debug.WriteLine("MainGrid cargado");
+			
 		}
 		#endregion
 
@@ -43,7 +45,24 @@ namespace NodeSharp
 		{
 			TxtDescripcionNodo.Text = TxtDescripcionNodo.Text.Trim();
 			System.Diagnostics.Debug.WriteLine("Perdio enfoque");
+
 		}
+		private void BtnCargarCodigo_Click(object sender, RoutedEventArgs e)
+		{
+			TxtEditorCodigo.SetCodeAsync(@"private string Concatenar (string s1, string s2) {
+				string res = string.Empty;
+				if (s1 != null && s2 != null)
+				{
+					res = s1 + s2;
+					return res;
+				}
+				else
+				{
+					return ""error"";
+				}
+			}");
+		}
+
 		#endregion
 
 	}
