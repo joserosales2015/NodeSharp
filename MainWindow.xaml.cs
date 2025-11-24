@@ -31,16 +31,17 @@ namespace NodeSharp
             InitializeComponent();
 		}
 
-		
 
 		#region Metodos
-		private void MainGrid_Loaded(object sender, RoutedEventArgs e)
-		{
-			
-		}
+	
 		#endregion
 
 		#region Eventos
+		private void MainGrid_Loaded(object sender, RoutedEventArgs e)
+		{
+
+		}
+
 		private void TxtDescripcionNodo_LostFocus(object sender, RoutedEventArgs e)
 		{
 			TxtDescripcionNodo.Text = TxtDescripcionNodo.Text.Trim();

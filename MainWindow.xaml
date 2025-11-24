@@ -96,6 +96,7 @@
 						</TextBox.HeaderTemplate>
 					</TextBox>
 				</StackPanel>
+				
 				<RelativePanel x:Name="PnlEditorCodigo"
 							   Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
 							   BorderBrush="#404040"
@@ -143,14 +144,6 @@
 							RelativePanel.AlignRightWithPanel="True"
 							Click="BtnCargarCodigo_Click"/>
 				</RelativePanel>
-
-				
-
-				
-				
-				
-				
-				
 			</RelativePanel>
 		</Grid>
     </Grid>
