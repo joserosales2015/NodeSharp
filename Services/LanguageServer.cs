@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.CodeAnalysis.SignatureHelp;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -86,7 +87,40 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 			return references;
 		}
 
-		// Bucle principal que escucha mensajes desde Javascript
+		private async Task FormatDocument()
+		{
+			var document = _workspace.CurrentSolution.GetDocument(_documentId);
+
+			// Obtener la versión formateada del documento
+			var formattedDocument = await Formatter.FormatAsync(document);
+
+			// Calcular la lista de cambios (edits) entre el documento viejo y el nuevo
+			var changes = await formattedDocument.GetTextChangesAsync(document);
+
+			// Transformar los TextChange de Roslyn al formato esperado por Monaco
+			var edits = changes.Select(c =>
+			{
+				var text = document.GetTextAsync().Result;
+				var startLinePosition = text.Lines.GetLinePosition(c.Span.Start);
+				var endLinePosition = text.Lines.GetLinePosition(c.Span.End);
+
+				return new
+				{
+					range = new
+					{
+						startLineNumber = startLinePosition.Line + 1,
+						startColumn = startLinePosition.Character + 1,
+						endLineNumber = endLinePosition.Line + 1,
+						endColumn = endLinePosition.Character + 1
+					},
+					text = c.NewText
+				};
+			}).ToArray();
+
+			string response = JsonSerializer.Serialize(new { type = "format_response", data = edits });
+			await SendString(response);
+		}
+
 		public async Task StartListening()
 		{
 			var buffer = new byte[1024 * 4];
@@ -157,6 +191,12 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 				});
 
 				await SendString(response);
+			}
+			else if (type == "format")
+			{
+				// No necesitamos actualizar el código porque Monaco ya tiene la versión más reciente
+				// Solo formateamos y enviamos los cambios
+				await FormatDocument();
 			}
 		}
 

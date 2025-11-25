@@ -74,6 +74,16 @@ require(['vs/editor/editor.main'], function () {
             // Guardamos la respuesta temporalmente
             window.latestSignature = msg.data;
         }
+        else if (msg.type === "format_response") {
+            // Monaco usa su propia API para ejecutar una lista de ediciones de texto
+            editor.executeEdits(
+                "formatter",
+                msg.data.map(edit => ({
+                    range: edit.range,
+                    text: edit.text
+                }))
+            );
+        }
     };
 
     // 3. Registrar Autocompletado (AHORA ESTÁ DENTRO DEL BLOQUE)
@@ -156,6 +166,25 @@ require(['vs/editor/editor.main'], function () {
                         requestId: requestId // Enviamos el ID de la solicitud
                     }));
                 }
+            });
+        }
+    });
+
+    monaco.languages.registerDocumentFormattingEditProvider('csharp', {
+        provideDocumentFormattingEdits: function (model, options, token) {
+
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: "format"
+                }));
+            }
+
+            // El proveedor debe devolver un array de ediciones.
+            // Dado que nuestra respuesta es asíncrona, usamos un hack de Promise
+            // para que Monaco espere, pero el manejo real se hace en socket.onmessage.
+            return new Promise(resolve => {
+                // El editor.executeEdits del socket.onmessage se encargará de esto.
+                resolve([]);
             });
         }
     });
