@@ -50,18 +50,31 @@ namespace NodeSharp
 		}
 		private void BtnCargarCodigo_Click(object sender, RoutedEventArgs e)
 		{
-			TxtEditorCodigo.SetCodeAsync(@"private string Concatenar (string s1, string s2) {
-				string res = string.Empty;
-				if (s1 != null && s2 != null)
-				{
-					res = s1 + s2;
-					return res;
-				}
-				else
-				{
-					return ""error"";
-				}
-			}");
+			TxtEditorCodigo.SetCodeAsync(@"public class Main {
+    
+    public Main() {
+        Concatenar(""a"", ""b"");
+        Sumar(2, 3);
+    }
+
+    private string Concatenar (string s1, string s2) {
+		string res = string.Empty;
+		if (s1 != null && s2 != null)
+		{
+			res = s1 + s2;
+			return res;
+		}
+		else
+		{
+			return ""error"";
+		}
+	}
+
+    public int Sumar (int a, int b)
+    {
+        return a+b;
+    }
+}");
 		}
 
 		#endregion

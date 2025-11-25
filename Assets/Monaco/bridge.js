@@ -12,16 +12,118 @@ require(['vs/editor/editor.main'], function () {
         minimap: { enabled: true }
     });
 
-    // Notificar a C# cuando el texto cambia (opcional)
-    editor.onDidChangeModelContent((e) => {
-        // Si usas WebView2, puedes enviar mensajes así:
-        // window.chrome.webview.postMessage({ type: 'textChanged', content: editor.getValue() });
+    // 2. Iniciar conexión WebSocket
+    // Asegúrate que este puerto (5000) sea el mismo que pusiste en MonacoEditor.xaml.cs
+    const socket = new WebSocket("ws://localhost:5000");
 
-        // Usamos postMessage para enviar datos al código C#
-        try {
-            window.chrome.webview.postMessage(editor.getValue());
-        } catch (error) {
-            console.error("Error al enviar mensaje a C#:", error);
+    socket.onopen = () => {
+        console.log("JS: Conectado al servidor WebSocket");
+    };
+
+    socket.onerror = (err) => {
+        console.error("JS: Error de WebSocket", err);
+    };
+
+    socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        const requestId = msg.requestId;
+
+        if (msg.type === "completion_response") {
+            // Aquí recibimos las sugerencias de C# y las guardamos
+            // Nota: Monaco requiere un "CompletionItemProvider" registrado para mostrar esto.
+            // Para simplificar, guardamos esto en una variable global que el Provider leerá.
+            window.latestSuggestions = msg.data;
+        }
+        else if (msg.type === "diagnostics") {
+            // Convertimos los datos que vienen de C# al formato de Monaco
+            var markers = msg.data.map(err => ({
+                severity: err.Severity,
+                startLineNumber: err.StartLine,
+                startColumn: err.StartColumn,
+                endLineNumber: err.EndLine,
+                endColumn: err.EndColumn,
+                message: err.Message
+            }));
+
+            // Aplicamos los marcadores al modelo actual
+            monaco.editor.setModelMarkers(monaco.editor.getModels()[0], "Roslyn", markers);
+        }
+        else if (msg.type === "signature_response") {
+            // Guardamos la respuesta temporalmente
+            window.latestSignature = msg.data;
+        }
+        
+    };
+
+    // 3. Registrar Autocompletado (AHORA ESTÁ DENTRO DEL BLOQUE)
+    monaco.languages.registerCompletionItemProvider('csharp', {
+        triggerCharacters: ['.'],
+        provideCompletionItems: function (model, position) {
+
+            const code = model.getValue();
+            const offset = model.getOffsetAt(position);
+
+            if (socket.readyState === WebSocket.OPEN) {
+                const request = {
+                    type: "completion",
+                    code: code,
+                    position: offset
+                };
+                socket.send(JSON.stringify(request));
+            }
+
+            // Devolver sugerencias cacheadas (Hack temporal para visualización)
+            var suggestions = (window.latestSuggestions || []).map(text => ({
+                label: text,
+                kind: monaco.languages.CompletionItemKind.Method,
+                insertText: text
+            }));
+
+            return { suggestions: suggestions };
+        }
+    });
+
+    monaco.languages.registerSignatureHelpProvider('csharp', {
+        // Caracteres que disparan la ayuda: paréntesis de apertura y coma
+        signatureHelpTriggerCharacters: ['(', ','],
+
+        provideSignatureHelp: function (model, position, token) {
+            const code = model.getValue();
+            const offset = model.getOffsetAt(position);
+
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: "signature",
+                    code: code,
+                    position: offset
+                }));
+            }
+
+            // Hack para esperar un poco la respuesta del socket (solo visual)
+            // En un mundo ideal usaríamos Promesas/Async real
+            var data = window.latestSignature || { signatures: [] };
+
+            return {
+                value: {
+                    signatures: data.signatures || [],
+                    activeSignature: data.activeSignature || 0,
+                    activeParameter: data.activeParameter || 0
+                },
+                dispose: () => { }
+            };
+        }
+    });
+
+    // 4. Escuchar cambios en el texto
+
+    // Enviar actualizaciones de código para mantener el servidor sincronizado
+    editor.onDidChangeModelContent((e) => {
+        if (socket.readyState === WebSocket.OPEN) {
+            const request = {
+                type: "update",
+                code: editor.getValue()
+            };
+            socket.send(JSON.stringify(request));
         }
     });
 });

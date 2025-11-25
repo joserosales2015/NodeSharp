@@ -9,6 +9,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using System.Net; 
+using NodeSharp.Services;
 
 namespace NodeSharp.Controls
 {
@@ -16,6 +18,7 @@ namespace NodeSharp.Controls
 	{
 		private bool _isEditorLoaded = false;
 		public event EventHandler<string> CodeChanged;
+		private HttpListener _httpListener;
 
 		public MonacoEditor()
 		{
@@ -76,6 +79,8 @@ namespace NodeSharp.Controls
 				_isEditorLoaded = true;
 				ApplyThemeBasedOnSystem(); // Llamada al método de configuración
 			};
+
+			StartSocketServer();
 		}
 
 		// --- Métodos Públicos para usar desde fuera ---
@@ -136,6 +141,27 @@ namespace NodeSharp.Controls
 			{
 				/* Ignorar si el mensaje no es el código esperado */ 
 			}
+		}
+
+		private void StartSocketServer()
+		{
+			Task.Run(async () =>
+			{
+				_httpListener = new HttpListener();
+				_httpListener.Prefixes.Add("http://localhost:5000/"); // Puerto 5000
+				_httpListener.Start();
+
+				while (true)
+				{
+					var context = await _httpListener.GetContextAsync();
+					if (context.Request.IsWebSocketRequest)
+					{
+						var wsContext = await context.AcceptWebSocketAsync(null);
+						var server = new LanguageServer(wsContext.WebSocket);
+						await server.StartListening(); // Esto bloquea el hilo por cliente, está bien en Task.Run
+					}
+				}
+			});
 		}
 	}
 }
