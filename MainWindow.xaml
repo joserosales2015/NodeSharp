@@ -17,11 +17,12 @@
     </Window.SystemBackdrop>
 
     <Grid x:Name="MainGrid"
-		Loaded="MainGrid_Loaded">
+		  Loaded="MainGrid_Loaded"
+		  SizeChanged="MainGrid_SizeChanged">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
+			<ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="500"/>
+            <ColumnDefinition MinWidth="500"/>
         </Grid.ColumnDefinitions>
         
         <Grid Grid.Column="0">

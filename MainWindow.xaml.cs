@@ -29,17 +29,26 @@ namespace NodeSharp
 		public MainWindow()
         {
             InitializeComponent();
+			
 		}
 
-
 		#region Metodos
-	
+		private void UpdateColumnWidth()
+		{
+			double halfWidth = MainGrid.ActualWidth / 2.0;
+			MainGrid.ColumnDefinitions[2].Width = new GridLength(halfWidth);
+		}
 		#endregion
 
 		#region Eventos
 		private void MainGrid_Loaded(object sender, RoutedEventArgs e)
 		{
+			UpdateColumnWidth();
+		}
 
+		private void MainGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			UpdateColumnWidth();
 		}
 
 		private void TxtDescripcionNodo_LostFocus(object sender, RoutedEventArgs e)
@@ -48,10 +57,10 @@ namespace NodeSharp
 			System.Diagnostics.Debug.WriteLine("Perdio enfoque");
 
 		}
+
 		private void BtnCargarCodigo_Click(object sender, RoutedEventArgs e)
 		{
 			TxtEditorCodigo.SetCodeAsync(@"public class Main {
-    
     public Main() {
         Concatenar(""a"", ""b"");
         Sumar(2, 3);
@@ -81,6 +90,5 @@ namespace NodeSharp
 		}
 
 		#endregion
-
 	}
 }

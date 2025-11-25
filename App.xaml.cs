@@ -44,7 +44,25 @@ namespace NodeSharp
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             _window = new MainWindow();
-            _window.Activate();
+
+			// Obtener el AppWindow
+			var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+			var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+			var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+
+			// Primero centrar
+			var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(windowId, Microsoft.UI.Windowing.DisplayAreaFallback.Primary);
+			int centerX = (displayArea.WorkArea.Width - appWindow.Size.Width) / 2;
+			int centerY = (displayArea.WorkArea.Height - appWindow.Size.Height) / 2;
+			appWindow.Move(new Windows.Graphics.PointInt32(centerX, centerY));
+
+			// Luego maximizar (opcional)
+			if (appWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+			{
+				presenter.Maximize();
+			}
+
+			_window.Activate();
         }
     }
 }
