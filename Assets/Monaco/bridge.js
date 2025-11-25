@@ -28,7 +28,29 @@ require(['vs/editor/editor.main'], function () {
         const msg = JSON.parse(event.data);
         const requestId = msg.requestId;
 
-        if (msg.type === "completion_response") {
+        if (msg.type === "hover_response") {
+            if (pendingRequests.has(requestId)) {
+                const resolve = pendingRequests.get(requestId);
+
+                // Transformar la respuesta de Roslyn al formato de Monaco
+                const hoverData = msg.data;
+                let result = null;
+
+                if (hoverData && hoverData.signature) {
+                    result = {
+                        contents: [
+                            { value: '```csharp\n' + hoverData.signature + '\n```' },
+                            { value: hoverData.documentation || "No documentation found." }
+                        ]
+                    };
+                }
+
+                // 2. Resolvemos la promesa que Monaco estaba esperando
+                resolve(result);
+                pendingRequests.delete(requestId); // Limpiamos el mapa
+            }
+        }
+        else if (msg.type === "completion_response") {
             // Aquí recibimos las sugerencias de C# y las guardamos
             // Nota: Monaco requiere un "CompletionItemProvider" registrado para mostrar esto.
             // Para simplificar, guardamos esto en una variable global que el Provider leerá.
@@ -52,7 +74,6 @@ require(['vs/editor/editor.main'], function () {
             // Guardamos la respuesta temporalmente
             window.latestSignature = msg.data;
         }
-        
     };
 
     // 3. Registrar Autocompletado (AHORA ESTÁ DENTRO DEL BLOQUE)
@@ -111,6 +132,31 @@ require(['vs/editor/editor.main'], function () {
                 },
                 dispose: () => { }
             };
+        }
+    });
+
+    const pendingRequests = new Map();
+    let requestIdCounter = 0;
+
+    monaco.languages.registerHoverProvider('csharp', {
+        provideHover: function (model, position) {
+            return new Promise(resolve => { // <--- DEVOLVEMOS UNA PROMESA
+
+                const requestId = requestIdCounter++; // ID único
+                const offset = model.getOffsetAt(position);
+
+                // Guardamos la función 'resolve' para llamarla después
+                pendingRequests.set(requestId, resolve);
+
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({
+                        type: "hover",
+                        position: offset,
+                        code: model.getValue(),
+                        requestId: requestId // Enviamos el ID de la solicitud
+                    }));
+                }
+            });
         }
     });
 

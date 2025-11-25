@@ -139,7 +139,24 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 				string response = JsonSerializer.Serialize(new { type = "signature_response", data = signatures });
 				await SendString(response);
 			}
-			
+			else if (type == "hover")
+			{
+				string code = root.GetProperty("code").GetString();
+				UpdateCode(code);
+
+				int requestId = root.GetProperty("requestId").GetInt32();
+				int position = root.GetProperty("position").GetInt32();
+				var hoverData = await GetHoverInfo(position);
+
+				string response = JsonSerializer.Serialize(new 
+				{ 
+					type = "hover_response", 
+					data = hoverData,
+					requestId = requestId
+				});
+
+				await SendString(response);
+			}
 		}
 
 		private void UpdateCode(string code)
@@ -254,16 +271,26 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 			};
 		}
 
-		private async Task<string> GetHoverInfo(int position)
+		private async Task<object> GetHoverInfo(int position)
 		{
 			var document = _workspace.CurrentSolution.GetDocument(_documentId);
-			var symbol = await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(document, position);
 
-			if (symbol != null)
+			// Buscar el símbolo (variable, método, clase) en la posición dada
+			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(document, position);
+
+			if (symbol == null) return null;
+
+			// Obtener la firma del símbolo (ej: "class System.Console" o "int x")
+			var signature = symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+
+			// Obtener la documentación XML asociada (si existe, ej. documentacion de .NET)
+			var documentation = symbol.GetDocumentationCommentXml();
+
+			return new
 			{
-				return symbol.ToDisplayString(); // Ej: "System.Console" o "int x"
-			}
-			return null;
+				signature = signature,
+				documentation = documentation
+			};
 		}
 
 		private async Task SendString(string data)
