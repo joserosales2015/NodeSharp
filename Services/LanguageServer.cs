@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Xml.Linq;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -282,14 +283,79 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 
 			// Obtener la firma del símbolo (ej: "class System.Console" o "int x")
 			var signature = symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-
+			
 			// Obtener la documentación XML asociada (si existe, ej. documentacion de .NET)
-			var documentation = symbol.GetDocumentationCommentXml();
+			var documentationXml = symbol.GetDocumentationCommentXml();
+			var documentation = "No documentado."; // Valor por defecto
+
+			if (!string.IsNullOrEmpty(documentationXml))
+			{
+				try
+				{
+					var memberElement = XElement.Parse(documentationXml);
+					var summaryElement = memberElement.Element("summary");
+
+					if (summaryElement != null)
+					{
+						documentation = summaryElement.Value.Trim();
+					}
+				}
+				catch (System.Xml.XmlException)
+				{
+					// Si el XML estuviera mal formado (caso improbable con Roslyn),
+					documentation = "Error al leer la documentación.";
+				}
+			}
+			else
+			{
+				// Solo verificamos si el símbolo tiene una declaración en el código actual
+				var syntaxReference = symbol.DeclaringSyntaxReferences.FirstOrDefault();
+
+				if (syntaxReference != null)
+				{
+					var declarationNode = await syntaxReference.GetSyntaxAsync();
+
+					// Buscamos comentarios en el LeadingTrivia (espacios, saltos de línea y comentarios 
+					// que preceden a la declaración)
+					var xmlTrivia = declarationNode.GetLeadingTrivia()
+						.Select(t => t.GetStructure())
+						.OfType<DocumentationCommentTriviaSyntax>()
+						.FirstOrDefault();
+
+					if (xmlTrivia != null)
+					{
+						string rawXml = xmlTrivia.ToFullString();
+						string cleanedXml = rawXml.Replace("///", "").Trim();
+
+						cleanedXml = $"<root>{cleanedXml}</root>";
+
+						try
+						{
+							var doc = XDocument.Parse(cleanedXml);
+							var summaryElement = doc.Root?.Element("summary");
+
+							if (summaryElement != null)
+							{
+								documentation = summaryElement.Value.Trim();
+							}
+							else
+							{
+								documentation = cleanedXml;
+							}
+						}
+						catch
+						{
+							// Si el XML está mal formado, al menos devolvemos el texto limpio.
+							documentation = cleanedXml;
+						}
+					}
+				}
+			}
 
 			return new
 			{
-				signature = signature,
-				documentation = documentation
+				signature,
+				documentation
 			};
 		}
 

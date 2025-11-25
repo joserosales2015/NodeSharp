@@ -57,6 +57,9 @@ namespace NodeSharp
         Sumar(2, 3);
     }
 
+	/// <summary>
+    /// Concatena dos strings en una sola.
+    /// </summary>
     private string Concatenar (string s1, string s2) {
 		string res = string.Empty;
 		if (s1 != null && s2 != null)
