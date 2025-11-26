@@ -9,7 +9,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    
     Title="NodeSharp">
 
     <Window.SystemBackdrop>
@@ -17,25 +16,23 @@
     </Window.SystemBackdrop>
 
     <Grid x:Name="MainGrid"
+		  KeyDown="MainGrid_KeyDown"
 		  Loaded="MainGrid_Loaded"
 		  SizeChanged="MainGrid_SizeChanged">
+		
         <Grid.ColumnDefinitions>
 			<ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition MinWidth="500"/>
         </Grid.ColumnDefinitions>
         
-        <Grid Grid.Column="0">
-			<Canvas 
-				Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-				HorizontalAlignment="Stretch"
-				VerticalAlignment="Stretch">
-				<Rectangle Fill="Red" Width="30" Height="30" Canvas.Left="0" Canvas.Top="0" Canvas.ZIndex="0" />
-                <Rectangle Fill="Blue" Width="30" Height="30" Canvas.Left="20" Canvas.Top="20" Canvas.ZIndex="1" />
-                <Rectangle Fill="Green" Width="30" Height="30" Canvas.Left="40" Canvas.Top="40" Canvas.ZIndex="2" />
-                <Rectangle Fill="Yellow" Width="30" Height="30" Canvas.Left="60" Canvas.Top="60" Canvas.ZIndex="3" />
-            </Canvas>
-        </Grid>
+		<nodeControls:NodeCanvas x:Name="MyNodeCanvas" 
+								 Grid.Column="0"
+								 IsTabStop="True"
+								 TabIndex="0"
+								 HorizontalAlignment="Stretch"
+								 VerticalAlignment="Stretch"
+								 ClickNode="MyNodeCanvas_ClickNode"/>
 
         <toolkit:GridSplitter
 			Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"

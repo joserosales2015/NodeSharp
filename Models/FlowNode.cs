@@ -9,13 +9,13 @@ namespace NodeSharp.Models
 		public string Id { get; set; }
 		public string Name { get; set; }
 		public string Summary { get; set; }
-		public Point Position { get; set; }
+		public Windows.Foundation.Point Position { get; set; }
 		public Size Size { get; set; }
 		public List<FlowNode> Connections { get; set; }
 		public Dictionary<string, object> Properties { get; set; }
 		public int IconIndex { get; set; }
 
-		public FlowNode(string name, string description, Point position, int iconIndex = -1)
+		public FlowNode(string name, string description, Windows.Foundation.Point position, int iconIndex = -1)
 		{
 			Id = Guid.NewGuid().ToString();
 			Name = name;
@@ -27,19 +27,20 @@ namespace NodeSharp.Models
 			IconIndex = iconIndex;
 		}
 
-		public Rectangle GetBounds()
+		public Windows.Foundation.Rect GetBounds()
 		{
-			return new Rectangle(Position, Size);
+			var rect = new Windows.Foundation.Rect(Position.X, Position.Y, Size.Width, Size.Height);
+			return rect;
 		}
 
-		public Point GetOutputPoint()
+		public Windows.Foundation.Point GetOutputPoint()
 		{
-			return new Point(Position.X + Size.Width / 2, Position.Y + Size.Height);
+			return new Windows.Foundation.Point(Position.X + Size.Width / 2, Position.Y + Size.Height);
 		}
 
-		public Point GetInputPoint()
+		public Windows.Foundation.Point GetInputPoint()
 		{
-			return new Point(Position.X + Size.Width / 2, Position.Y);
+			return new Windows.Foundation.Point(Position.X + Size.Width / 2, Position.Y);
 		}
 	}
 
@@ -55,15 +56,15 @@ namespace NodeSharp.Models
 		}
 
 		// Verifica si un punto está cerca de la línea de conexión
-		public bool IsNearConnection(Point point, float threshold = 10f)
+		public bool IsNearConnection(Windows.Foundation.Point point, float threshold = 10f)
 		{
 			var start = SourceNode.GetOutputPoint();
 			var end = TargetNode.GetInputPoint();
 
 			// Calcular distancia del punto a la curva Bézier
 			var controlOffset = Math.Abs(end.Y - start.Y) / 2;
-			var cp1 = new PointF(start.X, start.Y + controlOffset);
-			var cp2 = new PointF(end.X, end.Y - controlOffset);
+			var cp1 = new Windows.Foundation.Point(start.X, start.Y + controlOffset);
+			var cp2 = new Windows.Foundation.Point(end.X, end.Y - controlOffset);
 
 			// Aproximación: verificar múltiples puntos en la curva
 			for (float t = 0; t <= 1; t += 0.05f)
@@ -78,7 +79,7 @@ namespace NodeSharp.Models
 			return false;
 		}
 
-		private PointF GetBezierPoint(PointF p0, PointF p1, PointF p2, PointF p3, float t)
+		private Windows.Foundation.Point GetBezierPoint(Windows.Foundation.Point p0, Windows.Foundation.Point p1, Windows.Foundation.Point p2, Windows.Foundation.Point p3, float t)
 		{
 			float u = 1 - t;
 			float tt = t * t;
@@ -86,7 +87,7 @@ namespace NodeSharp.Models
 			float uuu = uu * u;
 			float ttt = tt * t;
 
-			PointF point = new PointF();
+			Windows.Foundation.Point point = new Windows.Foundation.Point();
 			point.X = uuu * p0.X + 3 * uu * t * p1.X + 3 * u * tt * p2.X + ttt * p3.X;
 			point.Y = uuu * p0.Y + 3 * uu * t * p1.Y + 3 * u * tt * p2.Y + ttt * p3.Y;
 
