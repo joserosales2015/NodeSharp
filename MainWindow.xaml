@@ -47,53 +47,105 @@
 				Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
 				HorizontalAlignment="Stretch"
 				VerticalAlignment="Stretch">
-				<StackPanel x:Name="PnlNodo"
-							Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-							BorderBrush="#404040"
-							BorderThickness="1"
-							Margin="0,8,8,0"
-							Orientation="Vertical"
-							Padding="0"
-							RelativePanel.AlignTopWithPanel="True"
-							RelativePanel.AlignLeftWithPanel="True"
-							RelativePanel.AlignRightWithPanel="True"
-							Spacing="0">
+
+				<RelativePanel x:Name="PnlNodo"
+							   Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+							   BorderBrush="#404040"
+							   BorderThickness="1"
+							   Margin="0,8,8,0"
+							   RelativePanel.AlignLeftWithPanel="True"
+							   RelativePanel.AlignRightWithPanel="True"
+							   RelativePanel.AlignTopWithPanel="True">
 
 					<Rectangle x:Name="ShpDivisor1"
 							   Fill="SteelBlue" 
 							   Height="5" 
-							   Margin="0,0,0,4"/>
+							   Margin="0,0,0,4"
+							   RelativePanel.AlignLeftWithPanel="True"
+							   RelativePanel.AlignRightWithPanel="True"
+							   RelativePanel.AlignTopWithPanel="True"/>
 
 					<TextBox x:Name="TxtNombreNodo"
-							 AutomationProperties.Name="simple TextBox"
-							 FontWeight="Bold"
-							 Header="Nodo"
+							 Foreground="SandyBrown"
+							 Header="Nombre Nodo"
+							 IsSpellCheckEnabled="False"
+							 LostFocus="TxtNombreNodo_LostFocus"
 							 Margin="8,0,8,8"
 							 MaxLength="24"
+							 MaxWidth="255"
+							 MinWidth="150"
 							 PlaceholderForeground="Gray"
-							 PlaceholderText="[Nombre del nodo]"/>
+							 PlaceholderText="[Nombre del nodo]"
+							 RelativePanel.AlignLeftWithPanel="True"
+							 RelativePanel.Below="ShpDivisor1"/>
 
 					<TextBox x:Name="TxtDescripcionNodo"
-							 AutomationProperties.Name="simple TextBox"
-							 FontSize="11"
+							 Foreground="LightGray"
 							 Header="Descripción"
 							 IsSpellCheckEnabled="True"
 							 LostFocus="TxtDescripcionNodo_LostFocus"
 							 Margin="8,0,8,8"
-							 MaxLength="50"
+							 MaxLength="70"
 							 PlaceholderForeground="Gray"
 							 PlaceholderText="[Descripción y detalle]"
-							 SelectionHighlightColor="Green">
-					
-						<TextBox.HeaderTemplate>
-							<DataTemplate>
-								<TextBlock
-									FontSize="14"
-									Text="{Binding}"/>
-							</DataTemplate>
-						</TextBox.HeaderTemplate>
-					</TextBox>
-				</StackPanel>
+							 RelativePanel.AlignRightWithPanel="True"
+							 RelativePanel.Below="ShpDivisor1"
+							 RelativePanel.RightOf ="TxtNombreNodo"/>
+
+					<ComboBox x:Name="CboTipoDato"
+							  DisplayMemberPath="Valor"
+							  Header="Tipo Dato Retorno"
+							  ItemsSource="{x:Bind tipoDatoItems}"
+							  Margin="8,8,8,8"
+							  MaxWidth="255"
+							  MinWidth="150"
+							  PlaceholderForeground="Gray"
+							  PlaceholderText="Seleccionar"
+							  RelativePanel.AlignLeftWithPanel="True"
+							  RelativePanel.Below="TxtNombreNodo"
+							  SelectionChanged="CboTipoDato_SelectionChanged"
+							  Visibility="Collapsed">
+						<x:String>Bool</x:String>
+						<x:String>Char</x:String>
+						<x:String>Decimal</x:String>
+						<x:String>Double</x:String>
+						<x:String>Float</x:String>
+						<x:String>Int</x:String>
+						<x:String>String</x:String>
+						<x:String>Void</x:String>
+					</ComboBox>
+
+					<TextBox x:Name="TxtParametros"
+							 Foreground="LightGray"
+							 Header="Parámetros"
+							 IsReadOnly="True"
+							 IsSpellCheckEnabled="False"
+							 Margin="8,8,4,8"
+							 MaxLength="100"
+							 PlaceholderForeground="Gray"
+							 PlaceholderText="[Sin parámetros]"
+							 RelativePanel.Below="TxtDescripcionNodo"
+							 RelativePanel.LeftOf="BtnEditarParametros"
+							 RelativePanel.RightOf="CboTipoDato"
+							 Visibility="Collapsed"/>
+
+					<Button x:Name="BtnEditarParametros"
+							Height="33"
+							Margin="0,8,8,8"
+							Padding="-4,0,-4,0"
+							RelativePanel.AlignBottomWith="CboTipoDato"
+							RelativePanel.AlignRightWithPanel="True"
+							ToolTipService.Placement="Top"
+							ToolTipService.ToolTip="Editar Parámetros"
+							Width="32"
+							Visibility="Collapsed">
+						<Image 
+							Height="16" 
+							Source="/Assets/Icons/edit.png" 
+							Width="16"/>
+					</Button>
+
+				</RelativePanel>
 				
 				<RelativePanel x:Name="PnlEditorCodigo"
 							   Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"

@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using NodeSharp.Controls;
+using NodeSharp.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,16 +30,38 @@ namespace NodeSharp
     public sealed partial class MainWindow : Window
     {
 		#region Variables y Propiedades
-
+		private FlowNode? nodoSeleccionado = null;
+		private List<TipoDatoItem> tipoDatoItems = new List<TipoDatoItem>();
 		#endregion
 		public MainWindow()
         {
             InitializeComponent();
-			
+			CargarItemsTipoDato();
 			MainGrid.IsTabStop = true;
 			MainGrid.Focus(FocusState.Programmatic);
+			TxtEditorCodigo.CodeChanged += TxtEditorCodigo_CodeChanged;
 		}
+
 		#region Metodos
+		private void CargarItemsTipoDato()
+		{
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "BY", Descripcion = "Byte" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "I", Descripcion = "Integer" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "L", Descripcion = "Long" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "D", Descripcion = "Decimal" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "F", Descripcion = "Float" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "DB", Descripcion = "Double" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "S", Descripcion = "String" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "C", Descripcion = "Char" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "B", Descripcion = "Boolean" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "DT", Descripcion = "DateTime" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "V", Descripcion = "Void" });
+			tipoDatoItems.Add(new TipoDatoItem { Codigo = "O", Descripcion = "Object" });
+
+			CboTipoDato.ItemsSource = tipoDatoItems;
+			CboTipoDato.DisplayMemberPath = "Descripcion";
+			CboTipoDato.SelectedValuePath = "Codigo";
+		}
 
 		private void UpdateColumnWidth()
 		{
@@ -52,10 +75,10 @@ namespace NodeSharp
 		{
 			UpdateColumnWidth();
 			
-			MyNodeCanvas.AddNode("InicioProceso", "Inicia el flujo del proceso de Suma", new Windows.Foundation.Point(96, 96), 0);
-			MyNodeCanvas.AddNode("LeerDatos", "Solicita al usuario los datos de entrada", new Windows.Foundation.Point(96, 208), 0);
-			MyNodeCanvas.AddNode("HacerOperacion", "Realiza la operación de suma", new Windows.Foundation.Point(96, 320), 0);
-			MyNodeCanvas.AddNode("MostrarResultado", "Muestra los resultados en pantalla", new Windows.Foundation.Point(96, 432), 0);
+			MyNodeCanvas.AddCodeNode("InicioProceso", "Inicia el flujo del proceso de Suma", new Windows.Foundation.Point(96, 96), 0);
+			MyNodeCanvas.AddCodeNode("LeerDatos", "Solicita al usuario los datos de entrada para mostrarlos después", new Windows.Foundation.Point(96, 208), 0);
+			MyNodeCanvas.AddCodeNode("HacerOperacion", "Realiza la operación de suma", new Windows.Foundation.Point(96, 320), 0);
+			MyNodeCanvas.AddCodeNode("MostrarResultado", "Muestra los resultados en pantalla", new Windows.Foundation.Point(96, 432), 0);
 		}
 
 		private void MainGrid_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -92,12 +115,75 @@ namespace NodeSharp
 
 		private void MyNodeCanvas_ClickNode(object? sender, Classes.ClickNodeEventArgs e)
 		{
-			System.Diagnostics.Debug.WriteLine($"Nodo clickeado: {e.Node.Name}");
+			nodoSeleccionado = e.Node;
+			TxtNombreNodo.Text = nodoSeleccionado.Name;
+			TxtDescripcionNodo.Text = nodoSeleccionado.Summary;
+			string tipoRetorno = string.Empty;
+			string codigo = string.Empty;
+			Microsoft.UI.Xaml.Visibility visibilidad = Visibility.Collapsed;
+
+			if (nodoSeleccionado is CodeNode codeNode)
+			{
+				tipoRetorno = codeNode.TipoRetorno;
+				codigo = codeNode.CodigoMetodo;
+				visibilidad = Visibility.Visible;
+			}
+			else if (nodoSeleccionado != null)
+			{
+				tipoRetorno = string.Empty;
+				codigo = "// Nodo de tipo: " + nodoSeleccionado.GetType().Name;
+				visibilidad = Visibility.Collapsed;
+			}
+
+			_ = TxtEditorCodigo.SetCodeAsync(codigo);
+			CboTipoDato.Visibility = visibilidad;
+			TxtParametros.Visibility = visibilidad;
+			BtnEditarParametros.Visibility = visibilidad;
+			CboTipoDato.SelectedValue = tipoRetorno;
+		}
+
+		private void TxtNombreNodo_LostFocus(object sender, RoutedEventArgs e)
+		{
+			TxtNombreNodo.Text = TxtNombreNodo.Text.Trim();
+			
+			if (nodoSeleccionado != null)
+			{
+				nodoSeleccionado.Name = TxtNombreNodo.Text;
+				MyNodeCanvas.Refresh();
+			}
 		}
 
 		private void TxtDescripcionNodo_LostFocus(object sender, RoutedEventArgs e)
 		{
 			TxtDescripcionNodo.Text = TxtDescripcionNodo.Text.Trim();
+
+			if (nodoSeleccionado != null)
+			{
+				nodoSeleccionado.Summary = TxtDescripcionNodo.Text;
+				MyNodeCanvas.Refresh();
+			}
+		}
+
+		private void CboTipoDato_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (CboTipoDato.SelectedItem is TipoDatoItem itemSeleccionado)
+			{
+				string tipo = itemSeleccionado.Codigo;
+
+				if (nodoSeleccionado is CodeNode)
+				{
+					((CodeNode)nodoSeleccionado).TipoRetorno = tipo;
+					MyNodeCanvas.Refresh();
+				}
+			}
+		}
+
+		private void TxtEditorCodigo_CodeChanged(object? sender, string e)
+		{
+			if (nodoSeleccionado is CodeNode)
+			{
+				((CodeNode)nodoSeleccionado).CodigoMetodo = e;
+			}
 		}
 
 		private void BtnCargarCodigo_Click(object sender, RoutedEventArgs e)

@@ -17,9 +17,8 @@ namespace NodeSharp.Models
 
 		public CodeNode(string name, string description, Windows.Foundation.Point position, int iconIndex = -1) : base(name, description, position, iconIndex)
 		{
-
 			Parametros = new List<ParametroMetodo>();
-			TipoRetorno = "void";
+			TipoRetorno = "V"; //Por defecto Void
 			CodigoMetodo = "// Escribe tu código aquí";
 		}
 

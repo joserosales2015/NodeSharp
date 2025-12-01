@@ -26,13 +26,9 @@ namespace NodeSharp.Controls
 			EditorWebView = this.FindName("EditorWebView") as WebView2;
 			InitializeAsync();
 			this.Unloaded += MonacoEditor_Unloaded;
-			this.CodeChanged += MonacoEditor_CodeChanged;
 		}
 
-		private void MonacoEditor_CodeChanged(object? sender, string e)
-		{
-			System.Diagnostics.Debug.WriteLine("Código actualizado desde MonacoEditor:");
-		}
+	
 
 		private void MonacoEditor_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 		{
@@ -134,8 +130,17 @@ namespace NodeSharp.Controls
 			// Desencapsulamos el JSON string que viene del JS
 			try
 			{
-				string code = System.Text.Json.JsonSerializer.Deserialize<string>(updatedCode);
-				CodeChanged?.Invoke(this, code);
+				var jsonDoc = JsonDocument.Parse(args.TryGetWebMessageAsString());
+				var root = jsonDoc.RootElement;
+
+				if (root.TryGetProperty("type", out var typeProp) &&
+					typeProp.GetString() == "ui_codeChanged")
+				{
+					string content = root.GetProperty("content").GetString();
+
+					// Disparamos el evento hacia afuera
+					CodeChanged?.Invoke(this, content);
+				}
 			}
 			catch 
 			{

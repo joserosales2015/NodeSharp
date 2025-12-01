@@ -12,6 +12,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Numerics;
+using NodeSharp.Constants;
 
 namespace NodeSharp.Rendering
 {
@@ -47,26 +48,19 @@ namespace NodeSharp.Rendering
 				g.DrawIcon("\uE74D", bounds._x + bounds._width - 16, bounds._y + 6, 11, Colors.DarkGray);
 
 			// TipoDato
-			g.DrawTextIcon('V', bounds._x + 8, bounds._y + 7, 10, Colors.Aqua);
-
-			// Dibujar icono si existe
-			//if (iconList != null && node.IconIndex >= 0 && node.IconIndex < iconList.Images.Count)
-			//{
-			//	var iconSize = 32; // Tamaño del icono
-			//	var iconX = bounds.X + 15; // Margen izquierdo
-			//	var iconY = bounds.Y + (bounds.Height - iconSize) / 2; // Centrado verticalmente
-
-			//	g.DrawImage(iconList.Images[node.IconIndex], iconX, iconY, iconSize, iconSize);
-			//}
-
+			if (node is CodeNode)
+			{
+				g.DrawTextIcon(((CodeNode)node).TipoRetorno, bounds._x + 8, bounds._y + 8, 12, DataTypeColors.GetColorByTypeCode(((CodeNode)node).TipoRetorno));
+			}
+			
 			// Nombre del nodo
 			g.DrawText(
 				text: node.Name,
-				x: bounds._x + 20,
+				x: bounds._x + (node is CodeNode ? 25 : 8),
 				y: bounds._y + 6,
 				w: bounds._width - 10,
 				h: bounds._height / 3,
-				color: Colors.SandyBrown,// Colors.Gold,// 
+				color: Colors.White,
 				new CanvasTextFormat()
 				{
 					FontFamily = "Consolas",
@@ -83,11 +77,11 @@ namespace NodeSharp.Rendering
 			// Descripción del nodo
 			g.DrawText(
 				text: node.Summary,
-				x: bounds._x + 10,
+				x: bounds._x + 8,
 				y: bounds._y + bounds._height / 3 + 4,
 				w: bounds._width - 10,
 				h: bounds._height / 3 * 2 - 12,
-				color: Colors.LightGray,
+				color: Windows.UI.Color.FromArgb(255, 148, 148, 148),
 				new CanvasTextFormat()
 				{
 					FontFamily = "Segoe UI",

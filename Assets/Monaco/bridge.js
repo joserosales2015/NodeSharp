@@ -193,12 +193,26 @@ require(['vs/editor/editor.main'], function () {
 
     // Enviar actualizaciones de código para mantener el servidor sincronizado
     editor.onDidChangeModelContent((e) => {
+        const currentCode = editor.getValue();
+
+        // 1. Enviar a Roslyn (Para IntelliSense)
         if (socket.readyState === WebSocket.OPEN) {
             const request = {
                 type: "update",
-                code: editor.getValue()
+                code: currentCode
             };
             socket.send(JSON.stringify(request));
+        }
+
+        // 2. NUEVO: Enviar a WinUI (Para la Interfaz de Usuario)
+        // Usamos postMessage, que es capturado por el control WebView2
+        try {
+            window.chrome.webview.postMessage(JSON.stringify({
+                type: "ui_codeChanged",
+                content: currentCode
+            }));
+        } catch (err) {
+            // Ignorar si WebView no está listo
         }
     });
 });

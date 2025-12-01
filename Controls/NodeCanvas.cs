@@ -224,6 +224,7 @@ namespace NodeSharp.Controls
 					selectedNode = node;
 					selectedConnection = null; // Deseleccionar conexión
 					nodeClicked = true;
+					ClickNode?.Invoke(this, new ClickNodeEventArgs(node));
 
 					if (args.Button == NodeMouseButton.Right)
 					{

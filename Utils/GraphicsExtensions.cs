@@ -125,12 +125,11 @@ namespace NodeSharp.Utils
 			g.DrawText(glyphCode, new Vector2(x, y), color, textFormat);
 		}
 
-		public static void DrawTextIcon(this CanvasDrawingSession g, char character, float x, float y, float size, Color color)
+		public static void DrawTextIcon(this CanvasDrawingSession g, string text, float x, float y, float size, Color color)
 		{
-			string text = character.ToString();
 			var textFormat = new CanvasTextFormat
 			{
-				FontFamily = "Segoe UI",
+				FontFamily = "Consolas",
 				FontSize = size,
 				FontWeight = FontWeights.Bold,
 				HorizontalAlignment = CanvasHorizontalAlignment.Left,
