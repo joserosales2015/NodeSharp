@@ -110,6 +110,13 @@ namespace NodeSharp.Controls
 			Refresh();
 		}
 
+		public void AddMainNode(string name, string description, Windows.Foundation.Point position, int iconIndex = -1)
+		{
+			var node = new MainNode(name, description, SnapToGrid(position), iconIndex);
+			nodes.Add(node);
+			Refresh();
+		}
+
 		public void AddNode(string name, string description, Windows.Foundation.Point position, int iconIndex = -1)
 		{
 			var node = new FlowNode(name, description, SnapToGrid(position), iconIndex);
@@ -331,7 +338,8 @@ namespace NodeSharp.Controls
 				IsLeftButton = false,
 				IsRightButton = false,
 				IsMiddleButton = false,
-				Delta = Vector2.Zero
+				Delta = Vector2.Zero,
+				Notification = ""
 			};
 
 			if (isConnecting && connectionSourceNode != null)
@@ -340,9 +348,26 @@ namespace NodeSharp.Controls
 				{
 					if (node != connectionSourceNode && node.GetBounds().Contains(new Windows.Foundation.Point(args.Position.X, args.Position.Y)))
 					{
-						if (!connectionSourceNode.Connections.Contains(node))
+						if (node is MainNode)
+						{
+							args.Notification = "El nodo principal no puede recibir conexiones.";
+							args.Position = new Vector2(
+								x: connectionSourceNode.Position._x + connectionSourceNode.Size.Width + 2, 
+								y: connectionSourceNode.Position._y + connectionSourceNode.Size.Height / 2
+							);
+						}
+						else if (connectionSourceNode.Connections.Any())
+						{
+							args.Notification = "Sólo puede conectarse a un nodo a la vez.";
+							args.Position = new Vector2(
+								x: connectionSourceNode.Position._x + connectionSourceNode.Size.Width + 2,
+								y: connectionSourceNode.Position._y + connectionSourceNode.Size.Height / 2
+							);
+						}
+						else
 						{
 							connectionSourceNode.Connections.Add(node);
+							args.Notification = "";
 						}
 						break;
 					}
@@ -506,6 +531,7 @@ namespace NodeSharp.Controls
 		public bool IsMiddleButton { get; set; }
 		public Vector2 Delta { get; set; }
 		public bool Handled { get; set; }
+		public string Notification { get; set; }
 	}
 
 	public class NodeCanvasKeyEventArgs : EventArgs

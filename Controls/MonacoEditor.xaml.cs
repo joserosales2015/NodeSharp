@@ -28,8 +28,6 @@ namespace NodeSharp.Controls
 			this.Unloaded += MonacoEditor_Unloaded;
 		}
 
-	
-
 		private void MonacoEditor_Unloaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
 		{
 			// Verificamos que el motor CoreWebView2 haya sido inicializado antes de intentar detenerlo.

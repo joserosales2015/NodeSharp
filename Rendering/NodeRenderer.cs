@@ -23,64 +23,115 @@ namespace NodeSharp.Rendering
 			var bounds = node.GetBounds();
 
 			// Sombra
-			using (var shadowBrush = new CanvasSolidColorBrush(g, Windows.UI.Color.FromArgb((byte)(isSelected ? 80 : 0), 195, 201, 213)))
+			if (node is MainNode)
 			{
-				g.FillRoundedRectangle(shadowBrush, bounds._x - 6, bounds._y - 6, bounds._width + 12, bounds._height + 12, 16f);
+				using (var brush = new CanvasSolidColorBrush(g, Windows.UI.Color.FromArgb((byte)(isSelected ? 80 : 0), 195, 201, 213)))
+				{
+					g.FillRoundedTop(brush, bounds._x - 6, bounds._y - 6, bounds._width + 12, bounds._height + 12, 46f, 16f);
+				}
+			}
+			else 
+			{
+				using (var shadowBrush = new CanvasSolidColorBrush(g, Windows.UI.Color.FromArgb((byte)(isSelected ? 80 : 0), 195, 201, 213)))
+				{
+					g.FillRoundedRectangle(shadowBrush, bounds._x - 6, bounds._y - 6, bounds._width + 12, bounds._height + 12, 16f);
+				}
 			}
 
-			// Fondo del nodo
-			using (var brush = new CanvasSolidColorBrush(g, Windows.UI.Color.FromArgb(255, 65, 66, 68)))
+			//Fondo del nodo
+			if (node is MainNode)
 			{
-				g.FillRoundedRectangle(brush, bounds, 10f);
+				using (var brush = new CanvasSolidColorBrush(g, Windows.UI.Color.FromArgb(255, 65, 66, 68)))
+				{
+					g.FillRoundedTop(brush, bounds._x, bounds._y, bounds._width, bounds._height, 40f, 10f);
+				}
+			}
+			else
+			{
+				using (var brush = new CanvasSolidColorBrush(g, Windows.UI.Color.FromArgb(255, 65, 66, 68)))
+				{
+					g.FillRoundedRectangle(brush, bounds, 10f);
+				}
 			}
 
 			// Borde
 			var borderColor = Windows.UI.Color.FromArgb(255, 195, 201, 213);
 			var borderWidth = 1f;
 
-			using (var brush = new CanvasSolidColorBrush(g, borderColor))
+			if (node is MainNode)
 			{
-				g.DrawRoundedRectangle(brush, bounds, 10f, borderWidth);
+				using (var brush = new CanvasSolidColorBrush(g, Colors.DodgerBlue))
+				{
+					g.DrawRoundedTop(brush, bounds._x, bounds._y, bounds._width, bounds._height, 40f, 10f, 2);
+				}
+			}
+			else 
+			{
+				using (var brush = new CanvasSolidColorBrush(g, borderColor))
+				{
+					g.DrawRoundedRectangle(brush, bounds, 10f, borderWidth);
+				}
 			}
 
 			// Iconos
-			if (isSelected) // Eliminar
+			if (isSelected && node is CodeNode) // Eliminar
 				g.DrawIcon("\uE74D", bounds._x + bounds._width - 16, bounds._y + 6, 11, Colors.DarkGray);
 
 			// TipoDato
 			if (node is CodeNode)
 			{
-				g.DrawTextIcon(((CodeNode)node).TipoRetorno, bounds._x + 8, bounds._y + 8, 12, DataTypeColors.GetColorByTypeCode(((CodeNode)node).TipoRetorno));
+				g.DrawTextIcon(((CodeNode)node).TipoRetorno, bounds._x + 7, bounds._y + 4, 12, DataTypeColors.GetColorByTypeCode(((CodeNode)node).TipoRetorno));
 			}
-			
+			else if (node is MainNode)
+			{
+				g.DrawTextIcon(((MainNode)node).TipoRetorno, bounds._x + 7, bounds._y + 4, 12, DataTypeColors.GetColorByTypeCode(((MainNode)node).TipoRetorno));
+			}
+
 			// Nombre del nodo
 			g.DrawText(
-				text: node.Name,
-				x: bounds._x + (node is CodeNode ? 25 : 8),
-				y: bounds._y + 6,
-				w: bounds._width - 10,
+				text: node.Name + "()",
+				x: bounds._x,
+				y: bounds._y,
+				w: bounds._width,
 				h: bounds._height / 3,
-				color: Colors.White,
+				color: node is MainNode ? Colors.Gold : Colors.White,
+				
 				new CanvasTextFormat()
 				{
 					FontFamily = "Consolas",
 					FontSize = 14,
 					FontWeight = FontWeights.Medium,
-					HorizontalAlignment = CanvasHorizontalAlignment.Left,
-					VerticalAlignment = CanvasVerticalAlignment.Top,
+					HorizontalAlignment = CanvasHorizontalAlignment.Center,
+					VerticalAlignment = CanvasVerticalAlignment.Center,
 					WordWrapping = CanvasWordWrapping.NoWrap,
 					TrimmingGranularity = CanvasTextTrimmingGranularity.Character,
-					TrimmingSign = CanvasTrimmingSign.Ellipsis
+					TrimmingSign = CanvasTrimmingSign.Ellipsis					
 				}
 			);
 
+			// Separador
+			CanvasStrokeStyle canvasStrokeStyle = new CanvasStrokeStyle()
+			{
+				DashStyle = CanvasDashStyle.Dash
+			};
+			using (var brush = new CanvasSolidColorBrush(g, node is MainNode ? Colors.SteelBlue : Colors.DimGray))
+			{
+				g.DrawLine(
+					new Vector2(bounds._x + 1, bounds._y + bounds._height / 3 + 1), 
+					new Vector2(bounds._x + bounds._width - (node is MainNode ? 3 : 1), bounds._y + bounds._height / 3 + 1), 
+					brush, 
+					1f, 
+					canvasStrokeStyle
+				);
+			}
+			
 			// Descripción del nodo
 			g.DrawText(
 				text: node.Summary,
-				x: bounds._x + 8,
-				y: bounds._y + bounds._height / 3 + 4,
-				w: bounds._width - 10,
-				h: bounds._height / 3 * 2 - 12,
+				x: bounds._x + 1,
+				y: bounds._y + bounds._height / 3,
+				w: bounds._width - 2,
+				h: bounds._height / 3 * 2 - 1,
 				color: Windows.UI.Color.FromArgb(255, 148, 148, 148),
 				new CanvasTextFormat()
 				{
@@ -88,15 +139,19 @@ namespace NodeSharp.Rendering
 					FontSize = 11,
 					FontWeight = FontWeights.Normal,
 					FontStyle = Windows.UI.Text.FontStyle.Italic,
-					HorizontalAlignment = CanvasHorizontalAlignment.Left,
-					VerticalAlignment = CanvasVerticalAlignment.Top,
+					HorizontalAlignment = CanvasHorizontalAlignment.Center,
+					VerticalAlignment = CanvasVerticalAlignment.Center,
 					TrimmingGranularity = CanvasTextTrimmingGranularity.Character,
 					TrimmingSign = CanvasTrimmingSign.Ellipsis
 				}
 			);
 
 			// Puntos de conexión
-			DrawInputPoint(g, node.GetInputPoint(), Windows.UI.Color.FromArgb(255, 195, 201, 213));
+			if (node is CodeNode)
+			{
+				DrawInputPoint(g, node.GetInputPoint(), Windows.UI.Color.FromArgb(255, 195, 201, 213));
+			}
+				
 			DrawOutputPoint(g, node.GetOutputPoint(), Windows.UI.Color.FromArgb(255, 195, 201, 213));
 		}
 

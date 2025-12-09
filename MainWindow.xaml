@@ -25,16 +25,19 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition MinWidth="500"/>
         </Grid.ColumnDefinitions>
-        
+
 		<nodeControls:NodeCanvas x:Name="MyNodeCanvas" 
 								 Grid.Column="0"
 								 IsTabStop="True"
 								 TabIndex="0"
 								 HorizontalAlignment="Stretch"
 								 VerticalAlignment="Stretch"
-								 ClickNode="MyNodeCanvas_ClickNode"/>
+								 ClickNode="MyNodeCanvas_ClickNode"
+								 NodeMouseUp="MyNodeCanvas_NodeMouseUp">
 
-        <toolkit:GridSplitter
+		</nodeControls:NodeCanvas>
+
+		<toolkit:GridSplitter
 			Background="{ThemeResource SolidBackgroundFillColorSecondaryBrush}"
 			Grid.Column="1"
             HorizontalAlignment="Center"
@@ -71,7 +74,7 @@
 							 IsSpellCheckEnabled="False"
 							 LostFocus="TxtNombreNodo_LostFocus"
 							 Margin="8,0,8,8"
-							 MaxLength="24"
+							 MaxLength="20"
 							 MaxWidth="255"
 							 MinWidth="150"
 							 PlaceholderForeground="Gray"
@@ -118,7 +121,7 @@
 					<TextBox x:Name="TxtParametros"
 							 Foreground="LightGray"
 							 Header="Parámetros"
-							 IsReadOnly="True"
+							 IsReadOnly="False"
 							 IsSpellCheckEnabled="False"
 							 Margin="8,8,4,8"
 							 MaxLength="100"
@@ -127,6 +130,7 @@
 							 RelativePanel.Below="TxtDescripcionNodo"
 							 RelativePanel.LeftOf="BtnEditarParametros"
 							 RelativePanel.RightOf="CboTipoDato"
+							 TextChanged="TxtParametros_TextChanged"
 							 Visibility="Collapsed"/>
 
 					<Button x:Name="BtnEditarParametros"
@@ -182,7 +186,8 @@
 							RelativePanel.AlignRightWithPanel="True"
 							RelativePanel.Below="LblEditorCodigo">
 						
-						<nodeControls:MonacoEditor x:Name="TxtEditorCodigo"/>
+						<nodeControls:MonacoEditor x:Name="TxtEditorCodigo"
+												   CodeChanged="TxtEditorCodigo_CodeChanged"/>
 					</Border>
 
 					<Button x:Name="BtnCargarCodigo"

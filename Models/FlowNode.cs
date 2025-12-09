@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -11,6 +12,8 @@ namespace NodeSharp.Models
 		public string Summary { get; set; }
 		public Windows.Foundation.Point Position { get; set; }
 		public Size Size { get; set; }
+		public FlowNode Parent { get; set; }
+		public FlowNode Child { get; set; }
 		public List<FlowNode> Connections { get; set; }
 		public Dictionary<string, object> Properties { get; set; }
 		public int IconIndex { get; set; }

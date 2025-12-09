@@ -4,21 +4,22 @@ using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
+using Microsoft.CodeAnalysis.FindSymbols; // Necesario para SymbolFinder.FindSymbolAtPositionAsync
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.SignatureHelp;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Xml.Linq;
 using System.Linq;
 using System.Net.WebSockets;
+
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.FindSymbols; // Necesario para SymbolFinder.FindSymbolAtPositionAsync
+using System.Xml.Linq;
 
 namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu proyecto
 {
@@ -28,7 +29,7 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 		private readonly AdhocWorkspace _workspace;
 		private readonly ProjectId _projectId;
 		private readonly DocumentId _documentId;
-
+		
 		public LanguageServer(WebSocket socket)
 		{
 			_socket = socket;
@@ -38,7 +39,7 @@ namespace NodeSharp.Services // Asegúrate que este namespace coincida con tu pr
 			_projectId = ProjectId.CreateNewId();
 
 			var allReferences = GetAllReferences();
-
+			
 			var projectInfo = ProjectInfo.Create(
 				_projectId, 
 				VersionStamp.Create(), 

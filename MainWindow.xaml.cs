@@ -31,15 +31,15 @@ namespace NodeSharp
     {
 		#region Variables y Propiedades
 		private FlowNode? nodoSeleccionado = null;
-		private List<TipoDatoItem> tipoDatoItems = new List<TipoDatoItem>();
+		private List<TipoDatoItem> tipoDatoItems = new ();
 		#endregion
+
 		public MainWindow()
         {
             InitializeComponent();
 			CargarItemsTipoDato();
 			MainGrid.IsTabStop = true;
 			MainGrid.Focus(FocusState.Programmatic);
-			TxtEditorCodigo.CodeChanged += TxtEditorCodigo_CodeChanged;
 		}
 
 		#region Metodos
@@ -63,11 +63,76 @@ namespace NodeSharp
 			CboTipoDato.SelectedValuePath = "Codigo";
 		}
 
+		private void ParsearParametros(ref CodeNode nodo, string texto)
+		{
+			if (nodoSeleccionado != null)
+			{
+				nodo.Parametros.Clear();
+
+				if (string.IsNullOrWhiteSpace(texto))
+					return;
+
+				var partes = texto.Split(',');
+
+				foreach (var parte in partes)
+				{
+					var limpio = parte.Trim();
+					var tokens = limpio.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+					if (tokens.Length >= 2)
+					{
+						nodo.Parametros.Add(new ParametroMetodo
+						{
+							Tipo = tokens[0],
+							Nombre = tokens[1]
+						});
+					}
+				}
+			}
+		}
+
+		public void ShowTeachingTipAtPosition(string message, string title, double x, double y)
+		{
+			// Crear un punto de anclaje invisible
+			var anchor = new Border
+			{
+				Width = 1,
+				Height = 1,
+				Margin = new Thickness(x, y, 0, 0),
+				HorizontalAlignment = HorizontalAlignment.Left,
+				VerticalAlignment = VerticalAlignment.Top
+			};
+
+			// Agregar al contenedor principal
+			MainGrid.Children.Add(anchor);
+
+			// Crear y mostrar el TeachingTip
+			var teachingTip = new TeachingTip
+			{
+				Title = title,
+				Subtitle = message,
+				Target = anchor,
+				IsLightDismissEnabled = true,
+				PreferredPlacement = TeachingTipPlacementMode.Right
+			};
+
+			MainGrid.Children.Add(teachingTip);
+			teachingTip.IsOpen = true;
+
+			// Limpiar al cerrar
+			teachingTip.Closed += (s, e) =>
+			{
+				MainGrid.Children.Remove(anchor);
+				MainGrid.Children.Remove(teachingTip);
+			};
+		}
+
 		private void UpdateColumnWidth()
 		{
 			double halfWidth = MainGrid.ActualWidth / 2.0;
 			MainGrid.ColumnDefinitions[2].Width = new GridLength(halfWidth);
 		}
+				
 		#endregion
 
 		#region Eventos
@@ -75,7 +140,7 @@ namespace NodeSharp
 		{
 			UpdateColumnWidth();
 			
-			MyNodeCanvas.AddCodeNode("InicioProceso", "Inicia el flujo del proceso de Suma", new Windows.Foundation.Point(96, 96), 0);
+			MyNodeCanvas.AddMainNode("Main", "Método público para exportar", new Windows.Foundation.Point(96, 96), 0);
 			MyNodeCanvas.AddCodeNode("LeerDatos", "Solicita al usuario los datos de entrada para mostrarlos después", new Windows.Foundation.Point(96, 208), 0);
 			MyNodeCanvas.AddCodeNode("HacerOperacion", "Realiza la operación de suma", new Windows.Foundation.Point(96, 320), 0);
 			MyNodeCanvas.AddCodeNode("MostrarResultado", "Muestra los resultados en pantalla", new Windows.Foundation.Point(96, 432), 0);
@@ -128,6 +193,12 @@ namespace NodeSharp
 				codigo = codeNode.CodigoMetodo;
 				visibilidad = Visibility.Visible;
 			}
+			else if (nodoSeleccionado is MainNode mainNode)
+			{
+				tipoRetorno = mainNode.TipoRetorno;
+				codigo = mainNode.CodigoMetodo;
+				visibilidad = Visibility.Visible;
+			}
 			else if (nodoSeleccionado != null)
 			{
 				tipoRetorno = string.Empty;
@@ -136,15 +207,24 @@ namespace NodeSharp
 			}
 
 			_ = TxtEditorCodigo.SetCodeAsync(codigo);
+			
 			CboTipoDato.Visibility = visibilidad;
 			TxtParametros.Visibility = visibilidad;
 			BtnEditarParametros.Visibility = visibilidad;
 			CboTipoDato.SelectedValue = tipoRetorno;
 		}
 
+		private void MyNodeCanvas_NodeMouseUp(object? sender, NodeCanvasMouseEventArgs e)
+		{
+			if (!string.IsNullOrEmpty(e.Notification))
+			{
+				ShowTeachingTipAtPosition(e.Notification, "NO PERMITIDO:", e.Position.X, e.Position.Y);
+			}
+		}
+
 		private void TxtNombreNodo_LostFocus(object sender, RoutedEventArgs e)
 		{
-			TxtNombreNodo.Text = TxtNombreNodo.Text.Trim();
+			TxtNombreNodo.Text = TxtNombreNodo.Text.Replace(" ", "").Trim();
 			
 			if (nodoSeleccionado != null)
 			{
@@ -175,6 +255,19 @@ namespace NodeSharp
 					((CodeNode)nodoSeleccionado).TipoRetorno = tipo;
 					MyNodeCanvas.Refresh();
 				}
+				else if (nodoSeleccionado is MainNode)
+				{
+					((MainNode)nodoSeleccionado).TipoRetorno = tipo;
+					MyNodeCanvas.Refresh();
+				}
+			}
+		}
+
+		private void TxtParametros_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if (nodoSeleccionado != null && nodoSeleccionado is CodeNode node)
+			{
+				ParsearParametros(ref node, TxtParametros.Text);
 			}
 		}
 
@@ -217,7 +310,7 @@ namespace NodeSharp
 }");
 		}
 
-		
+
 		#endregion
 	}
 }
